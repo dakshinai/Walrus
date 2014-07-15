@@ -1,0 +1,32 @@
+
+
+                   The Walrus Graph Visualization Tool
+
+                              version 0.6.3
+
+                               Mar 30, 2005
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+This is the first public release of the Walrus source code, which is licensed
+under the GNU GPL.
+
+See BUILDING for instructions on compiling the source.
+
+See README.RUN for instructions on running Walrus (but you should ignore all
+references to 'walrus.jar', since this source distribution doesn't include
+it, nor is it needed; however, if you wish to create a 'walrus.jar' for your
+own uses, then execute the shell script 'mkjar' after building Walrus).
+README.RUN also contains other useful information, such as pointers to
+documentation on the LibSea file format and information about mailing lists.
+
+Documentation for the source code is embarrassingly lacking, but see
+'docs/classdiagram.jpg'.  The GUI frontend is implemented in H3Main.java,
+and this may be the best starting point for exploring the source code.
+This file has grown rather unruly over time and includes a good many inner
+classes, but the remainder of the Walrus source code is better structured
+than H3Main.java, so keep your hopes up while digging around.
+
+Although nothing requires this, you may wish to download the LibSea source
+code as well, from <http://www.caida.org/tools/visualization/libsea/>.

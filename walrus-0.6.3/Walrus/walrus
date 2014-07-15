@@ -1,0 +1,2 @@
+#!/bin/sh
+java -classpath ../mp.jar:../antlrall-mod.jar:../libsea.jar:. H3Main

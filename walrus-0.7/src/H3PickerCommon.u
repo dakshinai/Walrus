@@ -1,0 +1,17 @@
+H3PickerCommon.class : H3PickerCommon.java
+H3PickerCommon.class : H3Math.java
+H3PickerCommon.class : H3Math.class
+H3PickerCommon.class : H3Picker.java
+H3PickerCommon.class : H3Picker.class
+H3PickerCommon.class : H3Graph.java
+H3PickerCommon.class : H3Graph.class
+H3PickerCommon.class : H3ViewParameters.java
+H3PickerCommon.class : H3ViewParameters.class
+H3PickerCommon.class : H3Canvas3D.java
+H3PickerCommon.class : H3Canvas3D.class
+H3PickerCommon.class : H3PickViewer.java
+H3PickerCommon.class : H3PickViewer.class
+H3PickerCommon.class : H3Circle.java
+H3PickerCommon.class : H3Circle.class
+H3PickerCommon.class : H3Axes.java
+H3PickerCommon.class : H3Axes.class

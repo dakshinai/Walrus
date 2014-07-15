@@ -1,0 +1,1 @@
+export CLASSPATH=../antlrall-mod.jar:../libsea.jar:../mp.jar:.

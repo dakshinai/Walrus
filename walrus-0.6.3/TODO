@@ -1,0 +1,34 @@
+                              WALRUS TODO
+
+
+=========================================================================
+BUGS & ISSUES
+=========================================================================
+
+* It can be slow (say, 5 minutes) loading large (50-80MB) graphs, and
+  Walrus provides no feedback during the load (such as with a progress bar).
+
+* With very large graphs (> ~500k nodes), the display may become
+  corrupted during navigation.
+
+* Owing to a AWT/Java3D/Swing bug, none of the keyboard accelerators for
+  the menus work.
+
+* Owing to a Java3D bug, the display tends to flicker when a user interacts
+  with the menus.
+
+* Owing to a Java3D bug, antialiasing doesn't work in immediate mode,
+  the mode used by Walrus.
+
+* Improve memory usage in H3RenderQueue and H3Transformer.
+
+
+=========================================================================
+FEATURES
+=========================================================================
+
+* Add some perceptually uniform colorscales.
+
+* Implement File->Save with Layout and File->Save with Layout As.
+
+* Implement File->Preferences.

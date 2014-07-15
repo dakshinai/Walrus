@@ -1,0 +1,835 @@
+                       A BRIEF GUIDE TO USING WALRUS
+
+
+===========================================================================
+TABLE OF CONTENTS
+===========================================================================
+
+ Installation
+ Usage
+ Menus
+ Mouse Controls
+ Keyboard Controls
+ File Format
+
+===========================================================================
+INSTALLATION
+===========================================================================
+
+Extract 'walrus-0.6.3.tar.gz' or 'walrus-0.6.3.zip' anywhere you wish.  This
+will create a subdirectory named 'walrus-0.6.3' containing several JAR files,
+among other things.
+
+ For UNIX users...
+
+   The file walrus-0.6.3.tar.gz was packaged with the standard TAR utility
+   and compressed with GNU GZIP (http://www.gzip.org).  You can unpack
+   it with the following command:
+
+       gzip -cd walrus-0.6.3.tar.gz | tar xvf -
+
+ For Windows users...
+
+   The file walrus-0.6.3.zip was packaged in the common ZIP format.  You
+   can unpack it using a program like WinZip (http://www.winzip.com/).
+
+
+===========================================================================
+USAGE
+===========================================================================
+
+Walrus usage has the following basic pattern: 1) load a graph, 2) adjust
+colors and other configuration items, and 3) start the rendering.  Step 3
+may be slightly unintuitive, but it fits the general design of Walrus.  In
+Walrus, configuration changes do not take effect until the rendering is
+explicitly started or "updated" by the user.  The alternative design of
+immediately updating the rendering upon each configuration change is
+impracticable since some changes have dramatic and expensive effects on the
+rendering.
+
+To run Walrus on a UNIX system (such as Solaris or Linux), enter the
+following at a shell prompt from within the 'walrus-0.6.3' subdirectory:
+
+   java -cp mp.jar:antlrall-mod.jar:libsea.jar:walrus.jar H3Main
+
+Or, you may execute the supplied shell script:
+
+   ./walrus
+
+On Windows, enter the following at a command prompt:
+
+   java -cp mp.jar;antlrall-mod.jar;libsea.jar;walrus.jar H3Main
+
+(Windows uses semicolons to separate the components of the CLASSPATH.)
+
+When viewing large graphs, you'll want to increase the maximum heap size.
+For example, the command to run Walrus with the maximum heap size set to
+128M looks like the following with Sun's JDK on a UNIX system:
+
+   java -Xmx128M -cp mp.jar:antlrall-mod.jar:libsea.jar:walrus.jar H3Main
+
+
+===========================================================================
+MENUS
+===========================================================================
+
+File
+   Open
+      --- Loads a graph for viewing.  This unloads the previously opened graph.
+   Save With Layout
+      --- [Not Yet Implemented]
+   Save With Layout As
+      --- [Not Yet Implemented]
+   Close
+      --- Unloads a graph from memory, and resets menus.
+   Preferences
+      --- [Not Yet Implemented]
+   Exit
+      --- Quits program.
+
+Rendering
+   Start
+      --- Starts rendering based on current configuration.
+   Stop
+      --- Stops rendering.
+   Update
+      --- Updates rendering to current configuration.  You must select
+          this menu item to make configuration changes (such as changing
+          the color of nodes) take effect.
+   Reset Rendering
+      --- Reverts the display to a pristine state.  Nodes are displayed
+          under the initial layout, and the axes are in the initial
+          orientation.  This feature is sometimes needed to fix irrevocable
+          corruption of the display caused by loss of floating-point
+          precision, which can occasionally happen while navigating very
+          large graphs.
+   Recompute Layout with Extended Precision
+      --- Recomputes the layout of the entire graph using extended precision
+          arithmetic.  Intermediate calculations are carried out with
+	  around 30 decimal digits of precision instead of the 15 digits
+          available with the built-in 'double' type.  Recomputing the layout
+          in extended precision may eliminate artifacts of numerical
+          instability in the layout.  However, it can take more than 200
+          times longer to compute the layout with extended precision, so
+          a layout that took just 1 second to compute in double precision
+          would now take more than 3 minutes, and a layout that took 1
+          minute would now take more than 3 hours.  A line of the following
+          form in the output shows the time, in milliseconds, it took
+          Walrus to compute the layout:
+
+               layoutHyperbolic.time[17473]
+
+   Adaptive Rendering
+      --- Selects whether the adaptive rendering algorithm is used.
+          The adaptive rendering algorithm tries to maintain a given
+          framerate (currently hardcoded) by rendering only as much as
+          it can within each time slot.  This trades display completeness
+          for interaction speed.
+   Multiple Node Sizes
+      --- Selects whether nodes are drawn at three different sizes based
+          on their distance from the center.  Enabling this reduces the
+          size of the nodes near the periphery, where they are most likely
+          to cause occlusion, and increases the size of the nodes near
+          the center, the position of greatest interest in many cases.
+          This also mirrors the distortions inherent in hyperbolic space,
+          in which the apparent size decreases along the radial direction
+          from the center.
+   Depth Cueing
+      --- Selects whether depth cueing (the progressive darkening of the
+          display away from the viewer) is enabled.  Depth cueing helps
+          the user to disambiguate the near from the far.  A bug in Java3D
+          currently prevents depth cueing from being disabled.
+   Coordinate Axes
+      --- Selects whether the coordinate axes and labels, and spherical
+          outline, are drawn.  These provide a valuable cue to the orientation
+          and movement of the display.
+   Automatic Refresh
+      --- Selects whether the display is redrawn whenever Walrus receives a
+          refresh event from Java3D/AWT.  There appears to be a bug in
+          Java3D/AWT that causes an excessive number of refresh events,
+          especially when the user interacts with the menus.  With this
+          option enabled, these refresh events can cause the display to
+          flicker annoyingly.  By disabling this option and by manually
+          refreshing when needed (see 'Refresh' below), you can
+          reduce these distracting flickers.
+   Automatic Extended Precision Layout
+      --- Selects whether layout calculations automatically switch to
+          extended precision arithmetic when needed.  If this is not
+          checked, the user is prompted when calculations fail from
+          an insufficient amount of precision.  The user can then choose
+          to either recompute the entire layout using extended precision
+          arithmetic, simply place the problematic nodes at the origin,
+          or cancel the layout attempt.  Note that when this menu item
+          is selected, the layout of only the problematic nodes is
+          calculated in extended precision.  Because not all nodes are
+          calculated in extended precision, the final layout may show
+          signs of numerical instability and thus may still be
+          unsatisfactory.  In such cases, you might want to select
+          Rendering->Recompute Layout with Extended Precision to recompute
+          the layout of the entire graph in extended precision.
+
+Display
+
+   Narrow To Subtree
+      --- Temporarily hides all but the subtree rooted at the node currently
+          at the center of the display.  The path leading back to the root
+          node from the central node is also preserved.  Pressing the 'n'
+          key has the same effect.  Clicking on a node with the middle mouse
+          button while holding down the control key will narrow the display
+          to the subtree rooted at that node.
+   Widen Subtree
+      --- Unhides the subtree rooted at the current central node.
+          Pressing the 'w' key has the same effect.
+   Widen Toward Root
+      --- Unhides the subtree rooted at the nearest ancestor of the current
+          central node at which some branching occurs.  That is, the nearest
+          ancestor with more than one child is found, and then the subtree
+          rooted at that ancestor is widened, in the manner of
+         'Widen Subtree'.
+   Widen To Entire Graph
+      --- Unhides the entire graph.  Any previously hidden parts are
+          revealed.
+   Prune Subtree
+      --- Temporarily hides the subtree rooted at the current central node.
+          The current central node and its parent link are also hidden.
+          Clicking on a node with the middle mouse button while holding down
+          the shift key will prune the subtree rooted at that node.
+   Prune To Children
+      --- Temporarily hides most of the subtree rooted at the current central
+          node.  Only the immediate children of the current node are left.
+          Pressing the '1' (numeral 1) key has the same effect.
+   Prune To Neighborhood
+      --- Temporarily hides most of the subtree rooted at the current central
+          node.  Only descendants of the current node that lie within the
+          distance selected from the submenu are left.
+          Pressing the keys '0' to '9' causes pruning to occur at the
+          corresponding distance (for example, the '2' key prunes to a
+          distance of 2, and so on).
+   Zoom In
+      --- Zooms toward the node at the center of the display.  Each time
+          this menu is selected the magnification of the display increases
+          by 25%.  Pressing the '.' key (the same key as for '>') has the
+          same effect.
+   Zoom Out
+      --- Zooms away from the node at the center of the display.  Each time
+          this menu is selected the magnification of the display decreases
+          to the previous step.  Pressing the ',' key (the same key as for
+          '<') has the same effect.
+   Zoom 1:1
+      --- Resets the display to normal magnification.  Pressing the '/'
+          key has the same effect.
+   Refresh
+      --- Clears and redraws the display.  This is particularly useful when
+          'Automatic Refresh' (see above) is turned off.
+   Wobble
+      --- Causes the display to wobble gently.  To stop the wobbling, click
+          anywhere in the window with the left mouse button.
+
+          Wobbling enhances the viewer's perception of shape and depth.
+          It relies on our remarkable ability to perceive shape from
+          motion.  Continuous rotations can also provide the same benefits
+          (see the section on mouse controls below).
+   Show Root Node
+      --- Brings the root node of the current spanning tree to the center
+          of the display.  This re-establishes a known display and thus
+          can be useful when one gets lost in the graph.
+   Show Parent Node
+      --- Brings the parent of the node currently at the center of the display
+          to the center.  This makes it possible to quickly navigate up
+          the tree toward the root.  Pressing the 'p' key has the same effect.
+   Show Previous Node
+      --- Brings the node previously at the center of the display back to
+          the center.  This provides a simple mechanism for taking a single
+          step back in the sequence of graph traversals.
+
+          The current and the previous nodes are remembered in a circular
+          buffer.  That is, when this menu item is selected, the node
+          currently at the center becomes the new "previous node", and thus
+          it is possible to switch back and forth between the two most
+          recently visited nodes by successively selecting this menu.
+   Save Position
+      --- Saves information about the node currently at the center of the
+          display and about the orientation of the display itself.  This
+          essentially takes a snapshot of the current display which may
+          be re-established at a later time with 'Restore Position'.
+   Restore Position
+      --- Re-establishes the display saved with 'Save Position'.  This is
+          possible so long as the graph has not been unloaded, or a different
+          spanning tree chosen, since the display was last saved.
+Spanning Tree
+   --- Presents a list of spanning trees found in the loaded graph.
+       Walrus uses the selected spanning tree to calculate the layout
+       of the entire graph.
+   ...
+
+Color Scheme
+   Predefined
+      --- Sets up a predefined color scheme.  The names follow a convention
+          for showing the colors in the scheme.  The color of nodes, tree
+          links, and non-tree links are shown in order and separated by
+          dashes, with transparent components enclosed in square brackets.
+
+       Yellow-Green-[Grey]
+           --- The color scheme active at startup.
+       ...
+       Beige-Gold-[Green]
+
+   Node Color
+      --- Specifies the coloring of nodes.
+       Transparent
+           --- Sets nodes to a transparent version of the currently active
+               color.  Only the predefined colors (the named colors rather
+               than an RGB-value derived from an attribute) can be made
+               transparent.
+       Invisible
+           --- Causes nodes not to be rendered.
+       Magenta
+           --- Sets nodes to a predefined color.  All nodes are set to the
+               same color.
+       ...
+       White
+
+       RGB
+           --- Sets nodes to the color specified by an RGB value stored in
+               an attribute.  Each node is colored separately according to
+               its value of the attribute selected in the 'Color Attribute'
+               menu (see next).
+       Color Attribute
+           --- Presents a list of attributes in the loaded graph that may
+               potentially contain color values.  All attributes of type
+               int, float3, or double3 are included, although it is up to
+               the user to judge whether any given attribute really
+               contains color information.
+
+               Int values should have 8-bit color components arranged in the
+               lower three bytes in the order red, green, and blue, with
+               blue in the lowest byte.  Float3 and double3 values should
+               have color components in the order red, green, and blue,
+               with each component in the range [0.0, 1.0].
+
+               You must select the 'RGB' menu item first to enable this menu.
+            ...
+       Selection Attribute
+           --- Determines which nodes will be drawn and which will be hidden.
+               If an attribute in this menu is chosen (that is, an attribute
+               other than 'None'), then Walrus draws only the nodes that have
+               a true value for the attribute.  All others are not drawn
+               although their incoming and outgoing links are drawn.
+            ...
+
+   Tree Link Color
+      --- Specifies the coloring of links in the current spanning tree.
+          The menu structure is the same as that for 'Node Color' above.
+       ...
+   Nontree Link Color
+      --- Specifies the coloring of links not in the current spanning tree.
+          The menu structure is the same as that for 'Node Color' above.
+       ...
+
+Node Label
+      --- Presents a list of attributes found in the loaded graph.
+          The values of the attributes selected in this menu are
+          shown in the status bar when the user highlights a node with
+          the middle mouse button (see the table of mouse controls below).
+   ...
+
+===========================================================================
+MOUSE CONTROLS
+===========================================================================
+
+Many common operations are carried out with the mouse, either alone or
+in combination with the shift or control key.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Summary of Mouse Controls:
+
+  modifier  button  meaning
+  --------  ------  ------------------------------------------------------
+              L     drag to rotate display about the origin
+              M     click or drag to examine attribute values and to
+                       get visual feedback on picking
+              R     click on a node to bring it to the origin
+    
+   shift      L     drag to continuously rotate the display
+                      (only the initial drag amount and direction matters)
+  control     L     click anywhere in the display to initiate continuous
+                      rotations that track mouse movements
+
+   shift      M     click on a node to temporarily hide the subtree rooted
+                      at that node
+  control     M     click on a node to temporarily hide all but the subtree
+                      rooted at that node and the path leading back to the
+                      root node
+
+   shift      R     same as for M above; this alternative is provided for
+                      users without a middle mouse button
+  control     R     click anywhere to bring back the node previously
+                      at the origin
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Detailed Description:
+
+L:
+    Drag the mouse anywhere on the display to rotate the display about
+    the origin in the direction of the drag.  Only the relative motion
+    of the drag matters.  The interaction model is that of the world in
+    your hands (or the sphere in your hands), which you can turn about
+    while remaining stationary yourself.
+
+    It is normal for parts of the graph to disappear during rotations.
+    Walrus uses an adaptive rendering algorithm that tries to maintain
+    a given framerate (currently hardcoded) by rendering only as much
+    as it can within each time slot.  This trades display completeness
+    for interaction speed.
+
+M:
+    Click on a node, or drag over nodes, to examine attribute values and
+    to get visual feedback on the picking algorithm.  To provide feedback
+    on picking, Walrus displays grey cross hairs at the location of a
+    mouse click and highlights the picked node, if any, with a red box.
+    The picking algorithm chooses the node closest to the eye, along the
+    line of sight, that lies within the circle enclosing the cross hairs.
+    This can sometimes lead to behavior that seems unintuitive.  This also
+    has the slight drawback of making it difficult to pick the more distant
+    of two nearby nodes.  Drag the display with the left mouse button to
+    clear the display of cross hairs and other artifacts.
+
+    Walrus also displays, in the status bar, the values of any attributes
+    selected in the 'Node Label' menu for the currently picked node.
+
+R:
+    Click on a node to bring it to the center of the display.  The entire
+    graph shifts in an animated sequence.
+
+    It is normal for parts of the graph to disappear during this operation,
+    owing to the adaptive rendering algorithm (see the comments for 'L').
+
+shift L: 
+    Hold down the shift key and briefly drag with the left mouse button
+    to continuously rotate the display.  The location of the drag doesn't
+    matter, and the rotation starts when the drag ends.  The display will
+    continously rotate in the direction of the drag and at a speed
+    roughly proportional to the drag velocity.  Click anywhere with the
+    left mouse button to stop the rotation.
+
+control L:
+    Click the left mouse button anywhere in the display while holding down
+    the control key to initiate continuous rotations that track the
+    subsequent movement of the mouse.  The direction and speed of the
+    rotations is determined by the position of the mouse pointer relative
+    to the center of the display.  This rotation vector is recomputed
+    whenever the mouse moves.
+
+    After the initial click, you control the rotations by moving the mouse
+    freely, without pressing or holding down any buttons and without
+    holding down the control key.  To stop the rotations, click anywhere
+    in the display with the left mouse button.
+
+shift M:
+    Click on a node to temporarily hide the subtree rooted at that node.
+    This has an effect similar to selecting Display->Prune Subtree, except
+    with this mouse control, the affected node need not be the central node.
+
+control M:
+    Click on a node to temporarily hide all but the subtree rooted at that
+    node and the path leading back to the root node.   This has an effect
+    similar to selecting Display->Narrow To Subtree, except with this mouse
+    control, the affected node need not be the central node.
+
+control R:
+    Click anywhere to bring back the node previously at the center of the
+    display.  You can bounce back and forth between the current node and
+    the previous node by clicking 'shift M' multiple times.
+
+
+===========================================================================
+KEYBOARD CONTROLS
+===========================================================================
+
+Summary of Keyboard Controls:
+
+  key         meaning
+  ----------  -------------------------------------------------------------
+   n          Display->Narrow To Subtree
+   w          Display->Widen Subtree
+   p          Display->Show Parent Node
+
+   .          Display->Zoom In
+   ,          Display->Zoom Out
+   /          Display->Zoom 1:1
+
+   0          Temporarily hide all descendants of the current central node.
+                The current central node is preserved, however, unlike the
+                situation after Display->Prune Subtree.
+   1          Display->Prune To Children
+   2 ... 9    Display->Prune To Neighborhood->distance <= #
+
+
+===========================================================================
+FILE FORMAT
+===========================================================================
+
+Walrus uses CAIDA's as yet unreleased LibSea graph library to read and
+write graph files.  Please see the files graph-format.txt and
+graph-example.txt, both in this directory, for a more detailed discussion
+of the syntax of the files.
+
+The LibSea file format is by design open-ended.  It provides flexible
+mechanisms by which application-specific conventions and policies may be
+implemented.  The remainder of this section describes the most important
+aspects of the LibSea file format (explanations that should help the
+user get up to speed quickly) and describes the conventions employed
+by Walrus.
+
+To aid understanding, the discussion in this section make references to the
+following graph, which is 'samples/simple.graph' slightly modified and with
+lines numbered.  Note: The '#' character introduces one-line comments that
+are ignored by the parser.  Similarly, text of the form '@....=' are inline
+comments that have no significance; they are somewhat analogous to
+C/C++/Java comments of the form /* ... */.
+
+     1	Graph
+     2	{
+     3	   ### metadata ###
+     4	   @name="Binary Tree";
+     5	   @description="A complete binary tree of height 3.";
+     6	   @numNodes=15;
+     7	   @numLinks=17;
+     8	   @numPaths=0;
+     9	   @numPathLinks=0;
+    10	
+    11	   ### structural data ###
+    12	   @links=[
+    13	      { @source=0; @destination=1; },
+    14	      { @source=0; @destination=2; },
+    15	      { @source=1; @destination=3; },
+    16	      { @source=1; @destination=4; },
+    17	      { @source=2; @destination=5; },
+    18	      { @source=2; @destination=6; },
+    19	      { @source=3; @destination=7; },
+    20	      { @source=3; @destination=8; },
+    21	      { @source=4; @destination=9; },
+    22	      { @source=4; @destination=10; },
+    23	      { @source=5; @destination=11; },
+    24	      { @source=5; @destination=12; },
+    25	      { @source=6; @destination=13; },
+    26	      { @source=6; @destination=14; },
+    27	      { @source=7; @destination=0; },
+    28	      { @source=14; @destination=0; },
+    29	      { @source=1; @destination=2; }
+    30	   ];
+    31	   @paths=;
+    32	
+    33	   ### attribute data ###
+    34	   @enumerations=;
+    35	   @attributeDefinitions=[
+    36	      {
+    37	         @name=$root;
+    38	         @type=bool;
+    39	         @default=|| false ||;
+    40	         @nodeValues=[ { @id=0; @value=T; } ];
+    41	         @linkValues=;
+    42	         @pathValues=;
+    43	      },
+    44	      {
+    45	         @name=$tree_link;
+    46	         @type=bool;
+    47	         @default=|| false ||;
+    48	         @nodeValues=;
+    49	         @linkValues=[
+    50	            { @id=0; @value=T; },
+    51	            { @id=1; @value=T; },
+    52	            { @id=2; @value=T; },
+    53	            { @id=3; @value=T; },
+    54	            { @id=4; @value=T; },
+    55	            { @id=5; @value=T; },
+    56	            { @id=6; @value=T; },
+    57	            { @id=7; @value=T; },
+    58	            { @id=8; @value=T; },
+    59	            { @id=9; @value=T; },
+    60	            { @id=10; @value=T; },
+    61	            { @id=11; @value=T; },
+    62	            { @id=12; @value=T; },
+    63	            { @id=13; @value=T; }
+    64	         ];
+    65	         @pathValues=;
+    66	      }
+    67	   ];
+    68	   @qualifiers=[
+    69	      {
+    70	         @type=$spanning_tree;
+    71	         @name=$sample_spanning_tree;
+    72	         @description=;
+    73	         @attributes=[
+    74	            { @attribute=0; @alias=$root; },
+    75	            { @attribute=1; @alias=$tree_link; }
+    76	         ];
+    77	      }
+    78	   ];
+    79	
+    80	   ### visualization hints ###
+    81	   @filters=;
+    82	   @selectors=;
+    83	   @displays=;
+    84	   @presentations=;
+    85	
+    86	   ### interface hints ###
+    87	   @presentationMenus=;
+    88	   @displayMenus=;
+    89	   @selectorMenus=;
+    90	   @filterMenus=;
+    91	   @attributeMenus=;
+    92	}
+
+---------------------------------------------------------------------------
+Metadata
+---------------------------------------------------------------------------
+
+The LibSea file format avoids including explicit counts of objects whenever
+possible as a way of reducing the number of places where inconsistency may
+occur.  Thus the only counts are those on lines 6 to 9.  They specify the
+total number of nodes, links, and paths in the file, and the total number
+of links in all paths.  Note that Walrus does not currently support paths.
+
+Nodes, links, and paths have an implicitly assigned ID or index which is
+used to connect together the objects in a file, such as between a link and
+its endpoints.  The ID's of the different object types (such as nodes and
+links) range independently from 0 to their maximum.  Specifically, the ID's
+range, without gaps, from 0 to object_count - 1, where object_count is the
+total number of objects of a particular type included in a file.  So in the
+sample graph, nodes have ID's 0, 1, ..., 14; links have ID's 0, 1, ..., 16;
+and so on.  ID's are assigned according to the order in which objects
+appear in a file.  That is, the link that appears first textually is
+assigned an ID of 0, the link that appears next is assigned 1, and so on
+with the remainder of the links and with the other object types.
+
+However, because nodes, unlike other objects, are not explicitly defined in
+a graph file, no information is actually stored, or available, about the
+ultimate correspondence between nodes and ID's (that is, because
+information about nodes does not appear in a file, "textual order" has no
+meaning).  In contrast, a simple examination of a file will yield the
+correspondence between links and their ID's.  The important implication is
+that the creator of a graph file must choose some arbitrary ordering of the
+nodes and use this ordering consistently whenever data about nodes is
+written to the file, such as when specifying the endpoints of links or when
+associating attribute values to nodes.
+
+The following example should clarify this point about node ID's.  Suppose
+you have three nodes A, B, and C, with links from A to B and from A to C.
+Suppose further that you have a node attribute called 'size', with A having
+the value 123, B having 456, and C having 789.  Now, for the purposes of
+creating a graph file, you might make the arbitrary ordering A(=0), B(=1),
+C(=2).  The only requirement on the ordering is that it start at zero and
+increase without gap until all nodes are accounted for.
+
+This assignment--A to 0, B to 1, and C to 2--is not explicitly recorded in
+the file.  However, the chosen ordering affects the contents of the file.
+For example, with this particular ordering of nodes, the links would be
+specified as
+
+     ...
+   @links=[
+      { @source=0; @destination=1; },
+      { @source=0; @destination=2; }
+   ];
+     ...
+
+And the 'size' attribute would be specified as
+
+     ...
+   @attributeDefinitions=[
+      {
+         @name=$size;
+         @type=int;
+         @default=;
+         @nodeValues=[
+            { @id=0; @value=123; },
+            { @id=1; @value=456; },
+            { @id=2; @value=789; }
+         ];
+         @linkValues=;
+         @pathValues=;
+      },
+     ...
+
+This example should reinforce the idea that node ID's are really assigned
+by the creator of the graph whereas the ID's of links (and other objects)
+are implicitly determined by their order of appearance in a file.
+
+
+---------------------------------------------------------------------------
+Structural Data
+---------------------------------------------------------------------------
+
+Links in LibSea are always directed and are specified by listing the ID's
+of the source and destination nodes, as on lines 13 to 29.  The first pair
+of nodes on line 13 is assigned link ID 0, the second pair on line 14 has ID
+1, and so on.  There is only a single list which includes all links,
+whether tree link or nontree link.  The distinction between tree and nontree
+links is made instead with attributes (see below).
+
+
+---------------------------------------------------------------------------
+Attributes
+---------------------------------------------------------------------------
+
+Attributes are the means by which data is associated with nodes, links, or
+paths.  A file may contain any number of attributes, and each attribute may
+be one of eight basic types.  The scalar types are boolean, integer, float,
+double, string, triples of floats ('float3'), triples of doubles
+('double3'), and enumerations.  The remaining supported types are lists of
+each scalar type.  Lists of lists are not supported, and each list must
+contain elements of a single type.
+
+All attributes are defined in a single attribute definitions list, as shown
+on line 35.  Attributes, like other objects, have ID's.  The ID of an
+attribute is simply the position of that attribute in the attribute
+definitions list.
+
+Each element in the list both defines the attribute--specifying the name
+and type--and provides the values, including the default value.  An
+attribute of a given name may supply values for any combination of nodes,
+links, or paths.  That is, attributes are not defined specifically for a
+single type of object, although in practice, most attributes will not apply
+to, or supply values for, all types of objects.  For example, the attribute
+named 'root' defined on lines 37 to 42, which marks the root node of a
+spanning tree, only supplies explicit values for nodes (on line 40).
+
+Each attribute definition includes three lists in which the values of the
+attribute for the three types of objects (nodes, links, and paths) are
+provided.  In the case of the 'root' attribute, the list for node values
+appears on line 40, link values on line 41, and path values on line 42.
+These lists supply the mapping from object ID's to attribute values with
+(ID, value) pairs.  For example, the pair
+
+                         { @id=0; @value=T; }
+
+on line 40 says that the node with ID 0 has a value of true ('T') for the
+boolean attribute named 'root'.  The pair on line 50, which is an element
+of the list for link values, says that the link with ID 0 has a value of
+true for the boolean attribute named 'tree_link'.  Although not required,
+it is recommended for performance reasons that the ID's in these lists be
+sorted in ascending order.  Of course, the lists need not include a mapping
+for all objects of a given type.  In fact, to save space both in the file
+and in the internal representation once loaded, it is recommended that
+attributes have default values and that they include explicit value
+mappings only where needed.
+
+Default values of attributes are specified in a syntax that differs
+slightly from that used in the lists providing attribute values.  The
+following table compares the syntax of default values and attribute values:
+
+                       syntax of                   syntax of
+       type         attribute values             default values
+      ------      ---------------------     --------------------------
+
+       bool               T                       ||  true  ||
+       bool               F                       || false  ||
+       int               123                      ||   123  ||
+      float             123.4f                    || 123.4f ||
+      double            123.4                     || 123.4  ||
+      string            "abc"                     || "abc"  ||
+      float3      { 0.5f; 1.0f; 2.0f; }     || { 0.5f, 1.0f, 2.0f } ||
+      double3     {  0.5;  1.0;  2.0; }     ||  { 0.5, 1.0, 2.0 }   ||
+      enum 9            enum 7                 || #fruits:APPLE ||
+     list int        [ 1, 2, 3 ]               ||   [1, 2, 3]   ||
+
+  ---==---==---==---==---==---==---==---==---==---==---==---==---==---==---
+
+Attributes have several uses in Walrus.  The user can (1) display attributes
+as node labels, (2) color nodes and links by RGB values stored in attributes,
+and (3) choose which nodes or links to show or hide based on the values of
+boolean attributes.
+
+As far as Walrus is concerned, there is no syntactic difference between an
+attribute storing color data and one storing non-color data.  Specifically,
+Walrus doesn't interpret the names of attributes in any way, or employ any
+other convention for distinguising between the two types of attributes.
+However, attributes intended to be used for coloring nodes/links must be of
+type integer, float3, or double3.  Walrus considers attributes of these
+types to be potential sources of coloring information and automatically
+builds several menus, such as Color Scheme->Node Color->Color Attribute,
+listing them.
+
+Integer attributes should encode the red, green, and blue components of a
+color into 32 bits in the order (_, R, G, B), with blue occupying the
+lowest eight bits and red occupying the next to highest eight bits.  More
+precisely, given R, G, and B,
+
+           color = ((R * 256) + G) * 256 + B.
+
+A tuple value should specify color with components that are in the range
+[0, 1].  So {0.0, 0.0, 0.0} would be black, and {1.0, 1.0, 1.0} would be
+white.  It is recommended that colors be specified with integer values,
+since they consume less memory when loaded than tuple values.
+
+Another use for attributes is to specify which nodes or links to draw or
+hide.  By including boolean attributes in graph files, the user can direct
+Walrus to draw only a subset of the nodes or links.  Again, only the type
+matters.  Walrus automatically includes all boolean attributes in the menus
+Color Scheme->Node Color->Selection Attribute, 
+Color Scheme->Tree Link Color->Selection Attribute, and
+Color Scheme->Nontree Link Color->Selection Attribute.
+When the user chooses attributes in these menus, only the nodes or links
+with a true value for the attributes will be drawn.  The incoming and
+outgoing links of hidden nodes are still drawn, and the nodes at the
+ends of hidden links are still drawn.
+
+It should be noted that although selection attributes determine which
+objects are drawn, they do not, however, cause the layout to be recomputed
+based on the visible objects.  Also, hidden nodes are not selectable.
+
+
+---------------------------------------------------------------------------
+Spanning Trees
+---------------------------------------------------------------------------
+
+Every graph file must specify at least one spanning tree.  The description
+of a spanning tree consists of two parts, information about the root node
+and the tree links.  A spanning tree is specified in a graph file with a
+combination of two boolean attributes, which indicate the root node and the
+tree links, and a qualifier.  The qualifier groups together the two
+attributes and indicates to Walrus that they form a specification for a
+spanning tree.
+
+A qualifier specifying a spanning tree appears on lines 70 to 76.  The
+actual information is provided by the two attributes referenced by the
+qualifier on lines 74 and 75.  Line 74 states that the attribute with ID 0
+indicates the root node, and line 75 states that the attribute with ID 1
+indicates the tree links.  The qualifier itself should have 'type' equal to
+'spanning_tree', as on line 70, but the choice of a name is entirely
+arbitrary (this one is called 'sample_spanning_tree').  The referenced
+attributes need not be named 'root' and 'tree_link', although this happens
+to be the case in the sample graph (on lines 37 and 45).  It is crucial,
+however, that correct names are supplied for the '@alias=' components, as
+they are done here on lines 74 and 75.
+
+Walrus allows graph files to include more than one spanning tree.  The
+following lines illustrate the specification of two spanning trees,
+presuming the graph file includes four attributes with ID's 0, 1, 3, and 4
+that contain the actual data about the spanning trees:
+
+   @qualifiers=[
+      {
+         @type=$spanning_tree;
+         @name=$weighted_spanning_tree;
+         @description=;
+         @attributes=[
+            { @attribute=0; @alias=$root; },
+            { @attribute=1; @alias=$tree_link; }
+         ];
+      },
+      {
+         @type=$spanning_tree;
+         @name=$breadth_first_spanning_tree;
+         @description=;
+         @attributes=[
+            { @attribute=3; @alias=$root; },
+            { @attribute=4; @alias=$tree_link; }
+         ];
+      }
+   ];
+
+It is quite all right for a single attribute to be referenced by multiple
+spanning tree qualifiers.

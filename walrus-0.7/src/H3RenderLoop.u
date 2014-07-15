@@ -1,0 +1,5 @@
+H3RenderLoop.class : H3RenderLoop.java
+H3RenderLoop.class : H3DisplayPosition.java
+H3RenderLoop.class : H3DisplayPosition.class
+H3RenderLoop.class : H3RotationRequest.java
+H3RenderLoop.class : H3RotationRequest.class

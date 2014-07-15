@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd Walrus
+rm ../walrus.jar >/dev/null 2>&1
+jar cvmf distrib/manifest-supplement ../walrus.jar *.class walrus-splash.jpg
